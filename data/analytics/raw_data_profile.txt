@@ -1,0 +1,187 @@
+================================================================================
+OLIST E-COMMERCE DATASET - RAW DATA PROFILING & VALIDATION REPORT
+Generated at: 2026-09-05 09:55:28
+Python Version: 3.10.13
+Overall Phase 2 Status: PASS (9/9 Datasets Passed)
+================================================================================
+
+EXECUTIVE SUMMARY TABLE:
+--------------------------------------------------------------------------------
+Dataset Name                           |     Rows | Cols | Duplicates | Status
+--------------------------------------------------------------------------------
+olist_customers_dataset.csv            |   99,441 |    5 |          0 | PASS  
+olist_geolocation_dataset.csv          | 1,000,163 |    5 |    261,831 | PASS  
+olist_order_items_dataset.csv          |  112,650 |    7 |          0 | PASS  
+olist_order_payments_dataset.csv       |  103,886 |    5 |          0 | PASS  
+olist_order_reviews_dataset.csv        |   99,224 |    7 |          0 | PASS  
+olist_orders_dataset.csv               |   99,441 |    8 |          0 | PASS  
+olist_products_dataset.csv             |   32,951 |    9 |          0 | PASS  
+olist_sellers_dataset.csv              |    3,095 |    4 |          0 | PASS  
+product_category_name_translation.csv  |       71 |    2 |          0 | PASS  
+--------------------------------------------------------------------------------
+
+DETAILED DATASET PROFILES & NULL VALUE DISTRIBUTIONS:
+================================================================================
+
+Dataset: olist_customers_dataset.csv
+  Status          : PASS
+  File Size       : 9,033,957 bytes (8.62 MB)
+  Total Rows      : 99,441
+  Total Columns   : 5
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    customer_id                        | object     |          0 |    0.00%
+    customer_unique_id                 | object     |          0 |    0.00%
+    customer_zip_code_prefix           | int64      |          0 |    0.00%
+    customer_city                      | object     |          0 |    0.00%
+    customer_state                     | object     |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+Dataset: olist_geolocation_dataset.csv
+  Status          : PASS
+  File Size       : 61,273,883 bytes (58.44 MB)
+  Total Rows      : 1,000,163
+  Total Columns   : 5
+  Duplicate Rows  : 261,831 (26.18%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    geolocation_zip_code_prefix        | int64      |          0 |    0.00%
+    geolocation_lat                    | float64    |          0 |    0.00%
+    geolocation_lng                    | float64    |          0 |    0.00%
+    geolocation_city                   | object     |          0 |    0.00%
+    geolocation_state                  | object     |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+Dataset: olist_order_items_dataset.csv
+  Status          : PASS
+  File Size       : 15,438,671 bytes (14.72 MB)
+  Total Rows      : 112,650
+  Total Columns   : 7
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    order_id                           | object     |          0 |    0.00%
+    order_item_id                      | int64      |          0 |    0.00%
+    product_id                         | object     |          0 |    0.00%
+    seller_id                          | object     |          0 |    0.00%
+    shipping_limit_date                | object     |          0 |    0.00%
+    price                              | float64    |          0 |    0.00%
+    freight_value                      | float64    |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+Dataset: olist_order_payments_dataset.csv
+  Status          : PASS
+  File Size       : 5,777,138 bytes (5.51 MB)
+  Total Rows      : 103,886
+  Total Columns   : 5
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    order_id                           | object     |          0 |    0.00%
+    payment_sequential                 | int64      |          0 |    0.00%
+    payment_type                       | object     |          0 |    0.00%
+    payment_installments               | int64      |          0 |    0.00%
+    payment_value                      | float64    |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+Dataset: olist_order_reviews_dataset.csv
+  Status          : PASS
+  File Size       : 14,451,670 bytes (13.78 MB)
+  Total Rows      : 99,224
+  Total Columns   : 7
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    review_id                          | object     |          0 |    0.00%
+    order_id                           | object     |          0 |    0.00%
+    review_score                       | int64      |          0 |    0.00%
+    review_comment_title               | object     |     87,656 |   88.34%
+    review_comment_message             | object     |     58,247 |   58.70%
+    review_creation_date               | object     |          0 |    0.00%
+    review_answer_timestamp            | object     |          0 |    0.00%
+  * Columns with missing values: review_comment_title (88.34%), review_comment_message (58.70%)
+--------------------------------------------------------------------------------
+
+Dataset: olist_orders_dataset.csv
+  Status          : PASS
+  File Size       : 17,654,914 bytes (16.84 MB)
+  Total Rows      : 99,441
+  Total Columns   : 8
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    order_id                           | object     |          0 |    0.00%
+    customer_id                        | object     |          0 |    0.00%
+    order_status                       | object     |          0 |    0.00%
+    order_purchase_timestamp           | object     |          0 |    0.00%
+    order_approved_at                  | object     |        160 |    0.16%
+    order_delivered_carrier_date       | object     |      1,783 |    1.79%
+    order_delivered_customer_date      | object     |      2,965 |    2.98%
+    order_estimated_delivery_date      | object     |          0 |    0.00%
+  * Columns with missing values: order_approved_at (0.16%), order_delivered_carrier_date (1.79%), order_delivered_customer_date (2.98%)
+--------------------------------------------------------------------------------
+
+Dataset: olist_products_dataset.csv
+  Status          : PASS
+  File Size       : 2,379,446 bytes (2.27 MB)
+  Total Rows      : 32,951
+  Total Columns   : 9
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    product_id                         | object     |          0 |    0.00%
+    product_category_name              | object     |        610 |    1.85%
+    product_name_lenght                | float64    |        610 |    1.85%
+    product_description_lenght         | float64    |        610 |    1.85%
+    product_photos_qty                 | float64    |        610 |    1.85%
+    product_weight_g                   | float64    |          2 |    0.01%
+    product_length_cm                  | float64    |          2 |    0.01%
+    product_height_cm                  | float64    |          2 |    0.01%
+    product_width_cm                   | float64    |          2 |    0.01%
+  * Columns with missing values: product_category_name (1.85%), product_name_lenght (1.85%), product_description_lenght (1.85%), product_photos_qty (1.85%), product_weight_g (0.01%), product_length_cm (0.01%), product_height_cm (0.01%), product_width_cm (0.01%)
+--------------------------------------------------------------------------------
+
+Dataset: olist_sellers_dataset.csv
+  Status          : PASS
+  File Size       : 174,703 bytes (0.17 MB)
+  Total Rows      : 3,095
+  Total Columns   : 4
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    seller_id                          | object     |          0 |    0.00%
+    seller_zip_code_prefix             | int64      |          0 |    0.00%
+    seller_city                        | object     |          0 |    0.00%
+    seller_state                       | object     |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+Dataset: product_category_name_translation.csv
+  Status          : PASS
+  File Size       : 2,613 bytes (0.00 MB)
+  Total Rows      : 71
+  Total Columns   : 2
+  Duplicate Rows  : 0 (0.00%)
+  Columns Breakdown:
+    Column Name                        | Dtype      | Null Count |   Null %
+    -----------------------------------|------------|------------|---------
+    product_category_name              | object     |          0 |    0.00%
+    product_category_name_english      | object     |          0 |    0.00%
+  * Columns with missing values: None (Complete dataset)
+--------------------------------------------------------------------------------
+
+END OF PROFILING REPORT
+================================================================================

@@ -1,0 +1,2 @@
+# Placeholder to preserve the dags directory in version control.
+# Airflow DAG definition files will be placed here (e.g., olist_etl_dag.py).

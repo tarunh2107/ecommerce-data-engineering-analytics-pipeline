@@ -1,0 +1,61 @@
+# ==============================================================================
+# Pipeline Global Configuration
+# ==============================================================================
+
+app:
+  name: "ecommerce-data-pipeline"
+  version: "1.0.0"
+  env: "development"
+
+storage:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  analytics_dir: "data/analytics"
+
+# Raw Olist Dataset Source Filenames
+raw_files:
+  customers: "olist_customers_dataset.csv"
+  geolocation: "olist_geolocation_dataset.csv"
+  order_items: "olist_order_items_dataset.csv"
+  order_payments: "olist_order_payments_dataset.csv"
+  order_reviews: "olist_order_reviews_dataset.csv"
+  orders: "olist_orders_dataset.csv"
+  products: "olist_products_dataset.csv"
+  sellers: "olist_sellers_dataset.csv"
+  category_translation: "product_category_name_translation.csv"
+
+# Apache Spark Settings
+spark:
+  app_name: "Olist_Ecommerce_ETL"
+  master: "local[*]"
+  driver_memory: "4g"
+  executor_memory: "4g"
+  shuffle_partitions: 8
+  log_level: "WARN"
+
+# PostgreSQL Data Warehouse Settings
+warehouse:
+  schema: "public"
+  tables:
+    dimensions:
+      customers: "dim_customers"
+      products: "dim_products"
+      sellers: "dim_sellers"
+      date: "dim_date"
+    facts:
+      orders: "fact_orders"
+      order_items: "fact_order_items"
+
+# Data Quality Thresholds & Rules
+quality_checks:
+  fail_on_error: true
+  max_null_percentage:
+    customer_id: 0.0
+    order_id: 0.0
+    product_id: 0.0
+    price: 0.0
+  min_row_counts:
+    customers: 90000
+    orders: 90000
+    order_items: 100000
+    products: 30000

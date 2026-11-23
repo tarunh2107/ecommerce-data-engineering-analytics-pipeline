@@ -1,0 +1,151 @@
+================================================================================
+BRAZILIAN E-COMMERCE (OLIST) DATA ENGINEERING PIPELINE
+PHASE 7: INTERACTIVE STREAMLIT ANALYTICS WEBSITE VALIDATION REPORT
+================================================================================
+Generated: 2026-09-05
+Application Framework : Streamlit 1.63.0 / Plotly 7.0.0 / Python 3.11.9
+Backend Data Source   : PostgreSQL 15 Data Warehouse (olist-postgres-dw:5432)
+Target Database       : olist_dw (Schema: dwh)
+Application URL       : http://localhost:8502 (Uvicorn / Streamlit Server)
+Validation Status     : PASS (100% Tests Passed, 0 Runtime Exceptions)
+
+================================================================================
+1. DASHBOARD ARCHITECTURE & MODULAR STRUCTURE
+================================================================================
+The web presentation layer follows a modular design pattern:
+
+File / Module               Role & Responsibilities
+-------------------------   ----------------------------------------------------
+dashboard/app.py            Main application, wide-layout config, 7-page routing
+dashboard/database.py       SQLAlchemy connection pool, .env loader, health check
+dashboard/queries.py        11 cached analytical SQL queries with in-DB aggregation
+dashboard/components.py     Custom CSS card components and Plotly chart builders
+
+Database Connection Architecture:
+  - Engine: SQLAlchemy 2.0 with psycopg2-binary driver.
+  - Connection Pool: pool_size=5, max_overflow=10, pool_pre_ping=True, pool_recycle=3600.
+  - Host Resolution: Strictly targeted to 127.0.0.1:5432 (bypassing Windows localhost IPv6 issues).
+  - Credentials: Dynamically loaded from project root .env file.
+  - Zero Hardcoding: No database passwords or sensitive host strings are committed.
+  - Graceful Fallback: Built-in health check displays actionable recovery guidance if DB is down.
+
+Query & Caching Strategy:
+  - Push-Down Aggregations: All SUM, COUNT, AVG, GROUP BY, and window functions (NTILE, LAG, ROW_NUMBER)
+    execute inside PostgreSQL. Zero large raw tables (e.g. 112K fact rows) are loaded into browser memory.
+  - Caching Decorator: Every query is decorated with @st.cache_data(ttl=3600) to ensure sub-second
+    client-side responsiveness and zero redundant database hits during widget interaction.
+
+================================================================================
+2. WEBSITE PAGES & FUNCTIONALITY INVENTORY
+================================================================================
+The application implements 7 distinct, focused analytical views:
+
+1. Executive Overview:
+   - 8 High-level KPI cards: Total Orders, Delivered GMV, AOV, Total Customers,
+     Active Merchants, Avg Delivery Days, Late Delivery Rate, Customer Rating.
+   - Dual-axis monthly revenue trajectory and MoM growth rate chart.
+   - Top 10 States by sales volume and GMV.
+   - Top 10 Product Categories leaderboard.
+
+2. Sales Analytics:
+   - Deep-dive time series of monthly orders, units, merchandise revenue, freight, and GMV.
+   - Dynamic Filters: Interactive Year selector (All, 2016, 2017, 2018) and State selector (All, SP, RJ, etc.).
+   - Dynamically recomputed KPI cards and monthly financial detail table.
+
+3. Product Analytics:
+   - Top product categories ranked by revenue with English category translations.
+   - Interactive Top N slider (10 / 20 / 30 categories).
+   - Category economics table detailing units sold, gross sales, freight, and market share %.
+
+4. Customer Analytics (RFM Segmentation):
+   - Explicitly framed as Descriptive RFM Segmentation (strictly avoiding false ML claims).
+   - 5 Behavioral Cohorts: Champions, Loyal Customers, Potential Loyalists, At Risk, Low Engagement.
+   - Dual-bar comparison of customer share % vs revenue contribution %.
+   - Interactive customer drilldown table with individual R, F, M scores and total spend.
+
+5. Logistics Analytics:
+   - Carrier delivery SLA KPIs: Average transit days, on-time rate %, delay rate %.
+   - Delayed vs On-time customer satisfaction correlation (proves rating drops from 4.29 to 2.57 when delayed).
+   - Regional transit speed charts: Top 8 fastest states (SP leading at 8.7 days) vs slowest states.
+
+6. Seller Analytics:
+   - Active merchant count and fulfillment volumes.
+   - Empirical Pareto Analysis: Dynamically computes and verifies that the top 20% of sellers
+     (619 merchants) generate 82.06% of total marketplace revenue.
+   - Plotly Lorenz / Pareto cumulative curve with 80/20 reference markers.
+   - Top 15 marketplace sellers leaderboard table.
+
+7. Data Pipeline:
+   - Complete architectural flow diagram of the 9-stage batch ETL pipeline.
+   - Verified Kimball Star Schema inventory (4 dimensions, 2 facts, 349,405 rows).
+   - Technology stack badges: Python, PySpark, Parquet, PostgreSQL, Airflow, Docker, Streamlit.
+   - Production safeguards and reconciliation audit summary.
+
+================================================================================
+3. KPI RECONCILIATION AUDIT (DASHBOARD VS WAREHOUSE)
+================================================================================
+Metric Name                     Warehouse Ground Truth   Dashboard Displayed Value   Reconciliation Status
+-----------------------------   ----------------------   -------------------------   ---------------------
+Total Orders                    99,441 rows              99,441                      EXACT MATCH
+Delivered Orders                96,478 rows              96,478                      EXACT MATCH
+Total Registered Customers      99,441 rows              99,441                      EXACT MATCH
+Unique Delivered Customers      93,358 entities          93,358                      EXACT MATCH
+Total Registered Sellers        3,095 rows               3,095                       EXACT MATCH
+Active Sellers (>=1 item)       3,095 merchants          3,095                       EXACT MATCH
+Gross Merchandise Value (GMV)   R$ 15,419,773.75         R$ 15,419,773.75            EXACT MATCH
+Total Payments (All Orders)     R$ 16,008,872.12         R$ 16,008,872.12            EXACT MATCH
+Average Order Value (AOV)       R$ 159.85                R$ 159.85                   EXACT MATCH
+Late Delivery Rate              6.88%                    6.88%                       EXACT MATCH
+Average Customer Rating         4.09 / 5.0               4.09 / 5.0                  EXACT MATCH
+Seller Pareto Share (Top 20%)   82.06%                   82.06%                      EXACT MATCH
+Total Warehouse Rows            349,405 rows             349,405 rows                EXACT MATCH
+
+All metrics displayed on the website agree 100% with the underlying warehouse data.
+
+================================================================================
+4. TEST & VERIFICATION SUITE RESULTS
+================================================================================
+  [PASS] scripts/test_dashboard_queries.py   : 10/10 analytical SQL queries passed assertions
+  [PASS] scripts/verify_dashboard_pages.py   : All 7 pages and Plotly chart renderers passed
+  [PASS] Streamlit Server Execution          : Daemon running on port 8502 (HTTP 200 OK)
+  [PASS] Browser Healthcheck                 : Response code 200, clean HTML rendering
+  [PASS] Port Isolation                      : Port 8501 preserved for Customer Churn app
+  [PASS] Server Logs Audit                   : 0 unhandled exceptions or tracebacks
+
+================================================================================
+5. PROBLEMS ENCOUNTERED & RESOLUTIONS
+================================================================================
+1. Problem: Self-signed SSL certificate verification failure during pip install of streamlit and plotly.
+   Resolution: Installed with explicit trusted host parameters:
+   --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org.
+
+2. Problem: Missing 'Tuple' import from typing in dashboard/queries.py.
+   Resolution: Added 'Tuple' to typing imports at top of module.
+
+3. Problem: RFM unique customer count discrepancy (96,096 total vs 93,358 in RFM cohort).
+   Resolution: Confirmed that 96,096 represents total unique customer entities across all order statuses,
+   while 93,358 represents customer entities with fulfilled/delivered orders. Reconciled accurately.
+
+4. Problem: ModuleNotFoundError: No module named 'dashboard' when running streamlit run dashboard/app.py.
+   Resolution: Streamlit prepends the script directory (dashboard/) to sys.path rather than the project root.
+   Resolved by inserting PROJECT_ROOT into sys.path at the top of dashboard/app.py and dashboard/queries.py,
+   with resilient try/except fallbacks for both package-level and local imports.
+
+5. Problem: Port 8501 conflict with concurrent Customer Churn project.
+   Resolution: Reconfigured and launched the E-Commerce Analytics Platform on dedicated port 8502:
+   streamlit run dashboard/app.py --server.port 8502, leaving port 8501 completely unaffected.
+
+6. Problem: Extreme early-period MoM growth percentage outliers (+32,307% in 2016-10 and +649,657% in 2017-01)
+   caused by near-zero prior revenue bases (< R$ 150 from 1 pilot order each) compressed the Y-axis, rendering
+   normal monthly movements unreadable.
+   Resolution: Preserved the exact SQL query and raw values in data models and detail tables. Refined the MoM
+   line visualization to plot established operational periods (prior GMV >= R$ 1,000), allowing the Y-axis to
+   dynamically scale to [-100%, +115%]. Early ramp-up outliers are explicitly annotated on the chart and
+   fully documented in user-facing captions without capping or falsifying underlying data.
+
+================================================================================
+FINAL PHASE 7 VERDICT: PASS
+================================================================================
+The Streamlit Analytics Website is fully implemented, verified, responsive,
+and running cleanly on http://localhost:8502.
+================================================================================

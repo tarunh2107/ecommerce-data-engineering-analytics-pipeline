@@ -1,0 +1,93 @@
+# ==============================================================================
+# GITIGNORE - E-Commerce Data Engineering & Analytics Pipeline
+# ==============================================================================
+
+# Environment & Credentials
+.env
+*.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python Bytecode, Caches & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+.venv/
+ENV/
+env/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Data Files & Large Generated Artifacts
+# Raw datasets (~136 MB, downloaded on demand via scripts/download_data.py)
+data/raw/*
+!data/raw/.gitkeep
+
+# Processed and Star Schema Parquet datasets (generated via PySpark)
+data/processed/*
+!data/processed/.gitkeep
+data/processed/warehouse/*
+!data/processed/warehouse/.gitkeep
+*.parquet
+*.parquet/
+
+# Checksum & CRC files
+*.crc
+.*.crc
+
+# Generated large SQL results (preserves directory structure; text audit reports remain tracked)
+data/analytics/sql_results/*
+!data/analytics/sql_results/.gitkeep
+
+# PySpark / Hadoop Windows Binaries & Logs
+metastore_db/
+derby.log
+spark-warehouse/
+*.spark/
+checkpoint/
+hadoop/
+
+# Apache Airflow Local State & Logs
+airflow.cfg
+airflow.db
+airflow-webserver.pid
+logs/
+dags/__pycache__/
+
+# Docker Logs
+*.docker.log
+
+# IDE & OS-Specific Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,119 @@
+=====================================================================================
+OLIST E-COMMERCE DATASET - PHASE 3 TRANSFORMATION & DATA QUALITY REPORT
+Generated at: 2026-09-05 09:14:16
+Python Version: 3.10.13
+PySpark Version: 3.5.9
+Overall Phase 3 DQ Status: PASS
+=====================================================================================
+
+1. DATASET VOLUMETRICS & ROW COUNT COMPARISONS:
+-------------------------------------------------------------------------------------
+Dataset Name              |     Raw Rows |   Clean Rows |   Delta / Duplicates
+-------------------------------------------------------------------------------------
+customers                 |       99,441 |       99,441 |          0 (No loss)
+geolocation               |    1,000,163 |       19,015 | -981,148 (Aggregated)
+order_items               |      112,650 |      112,650 |          0 (No loss)
+order_payments            |      103,886 |      103,886 |          0 (No loss)
+order_reviews             |       99,224 |       99,224 |          0 (No loss)
+orders                    |       99,441 |       99,441 |          0 (No loss)
+products                  |       32,951 |       32,951 |          0 (No loss)
+sellers                   |        3,095 |        3,095 |          0 (No loss)
+-------------------------------------------------------------------------------------
+
+2. CLEANING & NULL-HANDLING DOCUMENTATION:
+-------------------------------------------------------------------------------------
+• [ORDERS]: Parsed 5 timestamp columns to TimestampType. Preserved legitimate nulls in order_approved_at (160), order_delivered_carrier_date (1,783), and order_delivered_customer_date (2,965) representing non-delivered/in-transit orders.
+• [PRODUCTS]: Standardized misspelled columns 'product_name_lenght' -> 'product_name_length' and 'product_description_lenght' -> 'product_description_length'. Handled 610 missing category names by assigning 'unlabeled'. Preserved 2 products with missing physical dimensions. Joined English translations.
+• [GEOLOCATION]: Eliminated 261,831 exact duplicates. Aggregated coordinates per zip_code_prefix into representative centroids (mean latitude and longitude), reducing 1,000,163 raw rows to 19,015 distinct postal code locations.
+• [ORDER_REVIEWS]: Preserved review scores (1 to 5). Retained empty/null review titles (88.34%) and messages (58.70%) as valid reviews without text.
+• [ORDER_ITEMS]: Cast price and freight_value to double precision (2 decimal places). Verified non-negative financial amounts. Converted shipping_limit_date to TimestampType.
+• [ORDER_PAYMENTS]: Cast payment_value to double precision and payment_installments to integer. Verified non-negative payment values.
+• [CUSTOMERS / SELLERS]: Trimmed unique identifiers. Formatted zip code prefixes to 5-digit padded strings. Normalized city names to lowercase and state codes to uppercase.
+
+3. DERIVED BUSINESS FEATURES & FORMULAS:
+-------------------------------------------------------------------------------------
+• orders.delivery_time_days:
+    Formula    : round((unix_timestamp(order_delivered_customer_date) - unix_timestamp(order_purchase_timestamp)) / 86400.0, 2)
+    Description: Measures total delivery duration in days from order placement to customer delivery.
+• orders.delivery_delay_days:
+    Formula    : round((unix_timestamp(order_delivered_customer_date) - unix_timestamp(order_estimated_delivery_date)) / 86400.0, 2)
+    Description: Difference between actual and estimated delivery dates. Positive values denote delivery delays.
+• orders.is_late_delivery:
+    Formula    : order_delivered_customer_date > order_estimated_delivery_date (Boolean)
+    Description: Binary flag indicating customer delivery arrived past the estimated SLA.
+• order_items.order_item_total:
+    Formula    : round(price + freight_value, 2)
+    Description: Represents gross expenditure per item including shipping freight.
+
+4. DATA QUALITY VALIDATION RESULTS:
+-------------------------------------------------------------------------------------
+Check Category            | Target                         | Status | Details
+-------------------------------------------------------------------------------------
+Non-Null Key              | customers.customer_id          | PASS   | Zero nulls expected for customer_id, found 0
+Non-Null Key              | customers.customer_unique_id   | PASS   | Zero nulls expected for customer_unique_id, found 0
+Non-Null Key              | sellers.seller_id              | PASS   | Zero nulls expected for seller_id, found 0
+Non-Null Key              | orders.order_id                | PASS   | Zero nulls expected for order_id, found 0
+Non-Null Key              | orders.customer_id             | PASS   | Zero nulls expected for customer_id, found 0
+Non-Null Key              | order_items.order_id           | PASS   | Zero nulls expected for order_id, found 0
+Non-Null Key              | order_items.order_item_id      | PASS   | Zero nulls expected for order_item_id, found 0
+Non-Null Key              | order_items.product_id         | PASS   | Zero nulls expected for product_id, found 0
+Non-Null Key              | order_items.seller_id          | PASS   | Zero nulls expected for seller_id, found 0
+Non-Null Key              | order_payments.order_id        | PASS   | Zero nulls expected for order_id, found 0
+Non-Null Key              | order_payments.payment_sequential | PASS   | Zero nulls expected for payment_sequential, found 0
+Non-Null Key              | order_reviews.review_id        | PASS   | Zero nulls expected for review_id, found 0
+Non-Null Key              | order_reviews.order_id         | PASS   | Zero nulls expected for order_id, found 0
+Non-Null Key              | products.product_id            | PASS   | Zero nulls expected for product_id, found 0
+Non-Null Key              | geolocation.geolocation_zip_code_prefix | PASS   | Zero nulls expected for geolocation_zip_code_prefix, found 0
+Uniqueness                | customers.['customer_id']      | PASS   | Expected unique ['customer_id']. Duplicate keys: 0
+Uniqueness                | sellers.['seller_id']          | PASS   | Expected unique ['seller_id']. Duplicate keys: 0
+Uniqueness                | orders.['order_id']            | PASS   | Expected unique ['order_id']. Duplicate keys: 0
+Uniqueness                | order_items.['order_id', 'order_item_id'] | PASS   | Expected unique ['order_id', 'order_item_id']. Duplicate keys: 0
+Uniqueness                | products.['product_id']        | PASS   | Expected unique ['product_id']. Duplicate keys: 0
+Uniqueness                | geolocation.['geolocation_zip_code_prefix'] | PASS   | Expected unique ['geolocation_zip_code_prefix']. Duplicate keys: 0
+No Exact Duplicates       | customers                      | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | sellers                        | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | orders                         | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | products                       | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | order_items                    | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | order_payments                 | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | order_reviews                  | PASS   | Expected 0 exact duplicates, found 0
+No Exact Duplicates       | geolocation                    | PASS   | Expected 0 exact duplicates, found 0
+Non-Negative Value        | order_items.price              | PASS   | Expected non-negative values in price. Found 0 negative entries.
+Non-Negative Value        | order_items.freight_value      | PASS   | Expected non-negative values in freight_value. Found 0 negative entries.
+Non-Negative Value        | order_items.order_item_total   | PASS   | Expected non-negative values in order_item_total. Found 0 negative entries.
+Non-Negative Value        | order_payments.payment_value   | PASS   | Expected non-negative values in payment_value. Found 0 negative entries.
+Non-Negative Value        | order_payments.payment_installments | PASS   | Expected non-negative values in payment_installments. Found 0 negative entries.
+Non-Negative Value        | products.product_weight_g      | PASS   | Expected non-negative values in product_weight_g. Found 0 negative entries.
+Non-Negative Value        | products.product_length_cm     | PASS   | Expected non-negative values in product_length_cm. Found 0 negative entries.
+Non-Negative Value        | products.product_height_cm     | PASS   | Expected non-negative values in product_height_cm. Found 0 negative entries.
+Non-Negative Value        | products.product_width_cm      | PASS   | Expected non-negative values in product_width_cm. Found 0 negative entries.
+Value Range               | order_reviews.review_score     | PASS   | review_score entries outside range [1, 5]: 0
+Timestamp Order           | orders.order_purchase_timestamp <= order_delivered_customer_date | PASS   | Found 0 timestamp order inversions between order_purchase_timestamp and order_delivered_customer_date
+-------------------------------------------------------------------------------------
+
+5. REFERENTIAL INTEGRITY & ORPHAN RECORD ANALYSIS:
+-------------------------------------------------------------------------------------
+Relationship                             | Child Rows |  Orphans | Orphan % | Status
+-------------------------------------------------------------------------------------
+orders.customer_id -> customers.customer_id |     99,441 |        0 |    0.00% | PASS
+order_items.order_id -> orders.order_id  |    112,650 |        0 |    0.00% | PASS
+order_items.product_id -> products.product_id |    112,650 |        0 |    0.00% | PASS
+order_items.seller_id -> sellers.seller_id |    112,650 |        0 |    0.00% | PASS
+order_payments.order_id -> orders.order_id |    103,886 |        0 |    0.00% | PASS
+order_reviews.order_id -> orders.order_id |     99,224 |        0 |    0.00% | PASS
+-------------------------------------------------------------------------------------
+
+6. OUTPUT PARQUET DATASET LOCATIONS:
+-------------------------------------------------------------------------------------
+• customers           : /opt/airflow/data/processed/customers.parquet
+• sellers             : /opt/airflow/data/processed/sellers.parquet
+• orders              : /opt/airflow/data/processed/orders.parquet
+• products            : /opt/airflow/data/processed/products.parquet
+• order_items         : /opt/airflow/data/processed/order_items.parquet
+• order_payments      : /opt/airflow/data/processed/order_payments.parquet
+• order_reviews       : /opt/airflow/data/processed/order_reviews.parquet
+• geolocation         : /opt/airflow/data/processed/geolocation.parquet
+
+=====================================================================================
+END OF PHASE 3 TRANSFORMATION REPORT
+=====================================================================================

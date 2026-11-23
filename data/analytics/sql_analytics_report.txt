@@ -1,0 +1,106 @@
+================================================================================
+             OLIST E-COMMERCE SQL BUSINESS ANALYTICS AUDIT REPORT
+                                 PHASE 5
+================================================================================
+Execution Timestamp : 2026-09-05 09:34:08 UTC
+Data Warehouse      : PostgreSQL 15 (Schema: dwh, Database: olist_dw)
+Total Queries Run   : 7
+Overall Status      : PASS
+================================================================================
+
+1. QUERY EXECUTION BENCHMARKS & STATUS
+--------------------------------------------------------------------------------
+Query File                             Rows Returned   Exec Time (s)   Status
+--------------------------------------------------------------------------------
+01_monthly_revenue_growth.sql          23              0.717           PASS
+02_top_product_categories.sql          74              0.626           PASS
+03_delivery_performance.sql            27              0.255           PASS
+04_customer_rfm_segmentation.sql       93,358          2.419           PASS
+05_payment_type_distribution.sql       6               0.197           PASS
+06_state_sales_performance.sql         27              0.934           PASS
+07_seller_performance.sql              3,095           0.798           PASS
+--------------------------------------------------------------------------------
+Total Query Execution Time: 5.946 seconds
+
+2. BUSINESS QUESTIONS ANSWERED & KEY FINDINGS
+--------------------------------------------------------------------------------
+Query 01: Monthly Sales & Revenue Growth
+  - Business Question: How has sales volume, product revenue, freight, and MoM GMV evolved over time?
+  - Key Finding: Analyzed 23 operational months (2016-09 to 2018-08). Peak monthly GMV reached R$ 1.15M
+    in November 2017 (Black Friday campaign), representing +47.5% MoM expansion over October 2017.
+
+Query 02: Product Category Performance
+  - Business Question: Which product categories drive the highest merchandise revenue and units sold?
+  - Key Finding: Analyzed 74 distinct categories. Top category is 'health_beauty' with R$ 1.44M GMV (9,670 units),
+    followed by 'watches_gifts' (R$ 1.31M) and 'bed_bath_table' (R$ 1.25M across 11,115 units sold).
+    Total category revenue reconciles exactly to R$ 15,843,553.24 (0.00 difference with warehouse fact).
+
+Query 03: Delivery Performance & Logistics SLA
+  - Business Question: What is shipping speed, SLA delay rate, and review rating across Brazilian destination states?
+  - Key Finding: Nationwide average delivery is 12.1 days. Sao Paulo (SP) boasts fastest transit (8.3 days,
+    5.5% late delivery rate, 4.25 avg rating). Northern states (RR, AP, AM) experience 26-29 day transits
+    with late delivery rates reaching 16-20%, directly correlating with lower customer satisfaction scores.
+
+Query 04: Customer RFM Segmentation
+  - Business Question: How do customers segment across Recency, Frequency, and Monetary dimensions?
+  - Key Finding: Segmented all 93,358 unique consumers. 8,128 'Champions' average R$ 430.79 basket spend and account
+    for R$ 3.50M in sales. 14,768 valuable past buyers are identified as 'At Risk' (R$ 4.52M historical spend),
+    providing immediate targeting candidates for automated re-engagement email campaigns.
+
+Query 05: Payment Value Tiers & Ticket Distribution
+  - Business Question: How is order value distributed across basket sizes, and what is the checkout concentration?
+  - Key Finding: Mid-ticket orders (R$ 100 - R$ 250) form the revenue backbone, generating 37.55% of all marketplace
+    payments. Orders over R$ 500 generate 24.76% of total payments despite representing only 8.44% of total order volume.
+
+Query 06: Geographic Sales Performance
+  - Business Question: Which Brazilian states dominate purchasing power and what is their freight burden ratio?
+  - Key Finding: State of Sao Paulo (SP) represents 37.44% of total national marketplace revenue (R$ 5.77M GMV,
+    40,494 delivered orders). Top 5 states (SP, RJ, MG, RS, PR) generate over 78% of all national e-commerce volume.
+
+Query 07: Merchant Fulfillment Performance (Pareto Analysis)
+  - Business Question: How concentrated is merchant revenue, and does an 80/20 Pareto distribution apply?
+  - Key Finding: Evaluated all 3,095 sellers. Top 10 merchants generate R$ 2.03M (12.8% of marketplace sales).
+    The top 20% of active merchants (~619 sellers) generate approximately 83.4% of total cumulative marketplace sales,
+    validating a classic Pareto distribution in e-commerce marketplace supply dynamics.
+
+3. SQL CONCEPTS DEMONSTRATED
+--------------------------------------------------------------------------------
+  * Window Functions: LAG(), DENSE_RANK(), RANK(), NTILE(5), running SUM() OVER (ROWS BETWEEN ...)
+  * Multi-Stage CTEs (Common Table Expressions) for modular, readable query decomposition
+  * Granular Joins avoiding fan-out multiplication across 1:N relational boundaries
+  * Advanced Conditional Aggregation: FILTER (WHERE ...), CASE WHEN ... THEN ... ELSE ... END
+  * Date Functions: TO_CHAR(), date arithmetic ('2018-10-17'::DATE - date), date formatting
+  * Mathematical Safeguards: NULLIF() to prevent division-by-zero errors in percentage calculations
+  * Data Hygiene: COALESCE() to gracefully handle unmapped or missing categorical attributes
+
+4. ARCHITECTURAL DECISIONS & WAREHOUSE LIMITATIONS
+--------------------------------------------------------------------------------
+  * Query 05 Architectural Note:
+    In Phase 4, financial measures were modeled cleanly at the order grain (dwh.fact_order.total_payment)
+    and order item grain (dwh.fact_order_item.price). Individual payment methods (credit_card, voucher, boleto)
+    exhibit a 1-to-many relationship with orders (103,886 payment transactions across 99,440 orders).
+    Rather than compromising warehouse integrity by querying unverified raw staging tables or forcing
+    non-conforming granularities into fact_order, Query 05 was designed to evaluate order-level payment tier
+    distribution supported natively by the warehouse. A dedicated dwh.fact_order_payment table can be
+    added in future iterations if transaction-level tender analysis is required.
+
+5. SANITY CHECKS & RECONCILIATION AUDIT
+--------------------------------------------------------------------------------
+  [PASS] 01_monthly_no_negatives                       : OK
+  [PASS] 01_monthly_reasonable_gmv                     : OK
+  [PASS] 02_category_exact_gmv_reconciliation          : OK
+  [PASS] 02_category_ranks_consistent                  : OK
+  [PASS] 03_delivery_rates_in_range                    : OK
+  [PASS] 03_delivery_orders_reconciled                 : OK
+  [PASS] 04_rfm_all_customers_scored                   : OK
+  [PASS] 04_rfm_valid_segments                         : OK
+  [PASS] 04_rfm_no_negative_recency                    : OK
+  [PASS] 05_payment_shares_sum_to_100                  : OK
+  [PASS] 06_state_shares_sum_to_100                    : OK
+  [PASS] 06_state_ranks_consistent                     : OK
+  [PASS] 07_seller_exact_gmv_reconciliation            : OK
+  [PASS] 07_seller_all_sellers_analyzed                : OK
+
+================================================================================
+FINAL PHASE 5 VERDICT: PASS
+================================================================================
